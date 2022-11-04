@@ -6,9 +6,10 @@ namespace Core
 {
     public class Module : MonoBehaviour
     {
-        public virtual void Init()
+        protected Entity Entity;
+        public virtual void Init(Entity a_entity)
         {
-
+            Entity = a_entity;
         }
 
         public virtual void Manage()

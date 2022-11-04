@@ -7,9 +7,15 @@ namespace Core
     public class Entity : MonoBehaviour
     {
         [SerializeField] List<Module> m_modules;
+        private RTSInputActions m_actions;
 
-        public virtual void Init()
+        #region Properties
+        public RTSInputActions Actions => m_actions;
+        #endregion
+
+        public virtual void Init(RTSInputActions a_actions)
         {
+            m_actions = a_actions;
             foreach (Module module in m_modules)
             {
                 module.Init(this);
@@ -21,6 +27,14 @@ namespace Core
             foreach (Module module in m_modules)
             {
                 module.Manage();
+            }
+        }
+
+        public virtual void LateManage()
+        {
+            foreach (Module module in m_modules)
+            {
+                module.LateManage();
             }
         }
 

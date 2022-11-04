@@ -9,7 +9,7 @@ namespace Core.Modules.CameraManagement
     {
         [SerializeField] private float m_cameraSpeed = 20f;
         [SerializeField] private float m_screenXOffset = 0, m_screenYOffset = 0;
-        private CinemachineFreeLook m_camera;
+        private Camera m_camera;
 
         public override void Init(Entity a_entity)
         {
@@ -25,10 +25,10 @@ namespace Core.Modules.CameraManagement
 
         private void ManageMouseMovement()
         {
-            if (m_camera.Follow != null)
-            {
-                return;
-            }
+            //if (m_camera.Follow != null)
+            //{
+            //    return;
+            //}
             Vector3 dir = Vector3.zero;
             if (Input.mousePosition.x <= m_screenXOffset)
             {

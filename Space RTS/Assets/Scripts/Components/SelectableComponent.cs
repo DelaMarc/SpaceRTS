@@ -6,12 +6,10 @@ namespace Core.Component
 {
     public class SelectableComponent : CoreComponent
     {
-        [SerializeField] private float m_bottomRigHeight = 2;
-        [SerializeField] private float m_bottomRigRadius = 1.3f;
+        [SerializeField] private float m_minZoomValue = 2.5f;
 
         #region Getters
-        public float BottomRigHeight => m_bottomRigHeight;
-        public float BottomRigRadius => m_bottomRigRadius;
+        public float MinZoomValue => m_minZoomValue;
         #endregion
     }
 }

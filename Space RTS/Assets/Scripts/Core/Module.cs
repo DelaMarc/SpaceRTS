@@ -17,6 +17,11 @@ namespace Core
 
         }
 
+        public virtual void LateManage()
+        {
+
+        }
+
         public virtual void Cleanup()
         {
 

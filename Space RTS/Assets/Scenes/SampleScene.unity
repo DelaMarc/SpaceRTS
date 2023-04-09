@@ -393,7 +393,6 @@ GameObject:
   - component: {fileID: 430956581}
   - component: {fileID: 430956580}
   - component: {fileID: 430956579}
-  - component: {fileID: 430956582}
   m_Layer: 0
   m_Name: Camera Management
   m_TagString: Untagged
@@ -443,8 +442,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b57982634c25d24c90ad6a945dedf83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_zoom: 10
+  m_maxRotationAngle: 180
   m_camFollowSpeed: 0.2
+  m_cameraLookSpeed: 2
+  m_cameraPivotSpeed: 2
 --- !u!114 &430956581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -460,19 +461,6 @@ MonoBehaviour:
   m_modules:
   - {fileID: 430956580}
   m_camera: {fileID: 963194227}
---- !u!114 &430956582
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 430956577}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9bf4f79064e3084e9bd8b338cc19f80, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_camera: {fileID: 1335578971}
 --- !u!1 &462096812
 GameObject:
   m_ObjectHideFlags: 0

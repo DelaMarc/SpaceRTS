@@ -29,14 +29,12 @@ namespace Core.Modules.CameraManagement
         public override void Init(Entity a_entity)
         {
             base.Init(a_entity);
-            //m_camera = (Entity as CameraManagement).Camera;
             Camera = Entity as CameraManagement;
             m_rotating = false;
             Camera.Actions.General.Select.started += OnTrySelect;
             Camera.Actions.Camera.Zoom.performed += OnZoom;
             Camera.Actions.Camera.Rotate.performed += OnRotatePressed;
             Camera.Actions.Camera.Rotate.canceled += OnRotatePressed;
-            //Camera.Actions.Camera.RotateHeld.performed += OnRotateHeld;
             Debug.Log($"<color=green>Camera module started</color>");
             m_rotationX = 0;
             m_rotationY = 0;

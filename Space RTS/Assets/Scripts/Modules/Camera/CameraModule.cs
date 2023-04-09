@@ -1,5 +1,4 @@
-﻿using Cinemachine;
-using Core.Component;
+﻿using Core.Component;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +9,6 @@ namespace Core.Modules.CameraManagement
 {
     public class CameraModule : Module
     {
-        private const float TARGET_DISTANCE = 15;
         [SerializeField] float m_maxRotationAngle = 180f;
         [SerializeField] private float m_camFollowSpeed = 0.2f;
         [SerializeField] private float m_cameraLookSpeed = 2f;
@@ -22,12 +20,11 @@ namespace Core.Modules.CameraManagement
         private float m_zoomMax;
         private Vector3 m_zoomDir;
         private int m_zoomCount = 0;
-        private float m_timeZoomStart;
         //rotation
-        Vector3 m_previousCameraPosition;
-        Vector2 m_mousePos;
-        private bool m_rotating, m_rotatePressedThisFrame;
+        private bool m_rotating;
         private float m_lookAngle, m_pivotAngle, m_targetDistance;
+        float m_rotationX;
+        float m_rotationY;
 
         public override void Init(Entity a_entity)
         {
@@ -41,49 +38,51 @@ namespace Core.Modules.CameraManagement
             Camera.Actions.Camera.Rotate.canceled += OnRotatePressed;
             //Camera.Actions.Camera.RotateHeld.performed += OnRotateHeld;
             Debug.Log($"<color=green>Camera module started</color>");
+            m_rotationX = 0;
+            m_rotationY = 0;
         }
 
         public override void LateManage()
         {
             base.Manage();
-            m_mousePos = Entity.Actions.Camera.Point.ReadValue<Vector2>();
             FollowTarget();
             ManageRotation();
-            //m_camera.m_XAxis.Value = Input.GetAxis("Vertical")
-            m_rotatePressedThisFrame = false;
         }
 
         private void ManageRotation()
         {
-            if (m_currentSelected == null || !m_rotating || m_rotatePressedThisFrame)
+            if (!m_rotating)
             {
                 return;
             }
+            var input = Entity.Actions.Camera.RotationAxis.ReadValue<Vector2>();
+            // no target selected, the camera rotates around itself
+            if (m_currentSelected == null)
+            {
+                Vector3 rot = Vector3.zero;
+                Quaternion targetRotation;
+
+                m_lookAngle = m_lookAngle + (input.x * m_cameraLookSpeed * Time.fixedDeltaTime);
+                m_pivotAngle = Mathf.Clamp(m_pivotAngle + (input.y * m_cameraPivotSpeed * Time.fixedDeltaTime), -90f, 90f);
+                Debug.Log($"{m_lookAngle} {m_pivotAngle}");
+                rot.y = m_lookAngle;
+                rot.x = -m_pivotAngle;
+                targetRotation = Quaternion.Euler(rot);
+                Camera.Camera.transform.localRotation = targetRotation;
+                return;
+            }
+            // camera orbits around target
             var cam = Camera.Camera;
-            Vector3 currentPosition = cam.ScreenToViewportPoint(m_mousePos);
-            Vector3 direction = m_previousCameraPosition - currentPosition;
-
-            float rotationAroundYAxis = -direction.x * m_maxRotationAngle; // camera moves horizontally
-            float rotationAroundXAxis = direction.y * m_maxRotationAngle; // camera moves vertically
-            cam.transform.position = m_currentSelected.transform.position;
-            Debug.Log($"Manage Rotation, around X: {rotationAroundXAxis}, around Y: {rotationAroundXAxis}");
-
-            cam.transform.Rotate(new Vector3(1, 0, 0), rotationAroundXAxis);
-            cam.transform.Rotate(new Vector3(0, 1, 0), rotationAroundYAxis, Space.World);
-
-            cam.transform.Translate(new Vector3(0, 0, -m_targetDistance));
-            m_previousCameraPosition = currentPosition;
-
-            //return;
-            //Vector2 rotationInput = Entity.Actions.Camera.RotationAxis.ReadValue<Vector2>();
-            //Vector3 rotation = Vector3.zero;
-            //Quaternion targetRotation;
-
-            //m_lookAngle = m_lookAngle + (rotationInput.x * m_cameraLookSpeed);
-            //m_pivotAngle = m_pivotAngle + (rotationInput.y * m_cameraPivotSpeed);
-            //rotation.y = m_lookAngle;
-            //targetRotation = Quaternion.Euler(rotation);
-            //Camera.Camera.transform.localRotation = targetRotation;
+            Debug.Log(input);
+            m_rotationY += input.x * m_cameraLookSpeed * Time.fixedDeltaTime;
+            m_rotationX -= input.y * m_cameraPivotSpeed * Time.fixedDeltaTime;
+            m_rotationX = Mathf.Clamp(m_rotationX, -90, 90);
+            Quaternion rotation = Quaternion.Euler(m_rotationX, m_rotationY, 0);
+            // Calcule la position de la caméra en fonction de la rotation et de la distance par rapport à l'objet cible
+            Vector3 position = rotation * new Vector3(0, 0, -m_targetDistance) + m_currentSelected.transform.position;
+            // Applique la rotation et la position de la caméra
+            cam.transform.transform.rotation = rotation;
+            cam.transform.transform.position = position;            
         }
 
         private void FollowTarget()
@@ -153,7 +152,6 @@ namespace Core.Modules.CameraManagement
                 m_zoomMax = m_currentSelected.MinZoomValue;
             }
             m_camFollowVelocity = Vector3.zero;
-            m_timeZoomStart = Time.time;
             m_zoomDir = Camera.Camera.transform.forward * m_zoomMax;
             Debug.Log($"Zoom on {Camera.Target.name}");
         }
@@ -165,8 +163,6 @@ namespace Core.Modules.CameraManagement
             {
                 Camera.Target = null;
                 m_zoomCount = 0;
-                m_previousCameraPosition = Camera.Camera.ScreenToViewportPoint(m_mousePos);
-                m_rotatePressedThisFrame = true;
                 m_targetDistance = Vector3.Distance(Camera.Camera.transform.position, m_currentSelected.transform.position);
             }
         }

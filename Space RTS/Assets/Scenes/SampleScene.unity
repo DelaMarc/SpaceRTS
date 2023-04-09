@@ -444,8 +444,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_maxRotationAngle: 180
   m_camFollowSpeed: 0.2
-  m_cameraLookSpeed: 2
-  m_cameraPivotSpeed: 2
+  m_cameraLookSpeed: 5
+  m_cameraPivotSpeed: 5
 --- !u!114 &430956581
 MonoBehaviour:
   m_ObjectHideFlags: 0

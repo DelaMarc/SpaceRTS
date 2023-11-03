@@ -15,7 +15,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Zoom",
+                    "name": "Focus",
                     "type": "Button",
                     "id": "7a8be7a0-13f0-4c3d-acb8-a64e64537e79",
                     "expectedControlType": "Button",
@@ -40,6 +40,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Zoom",
+                    "type": "PassThrough",
+                    "id": "38dc5fc0-6d41-41a1-9e08-a8cc1bd377b2",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -61,7 +70,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard and mouse",
-                    "action": "Zoom",
+                    "action": "Focus",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -84,6 +93,17 @@
                     "processors": "",
                     "groups": "Keyboard and mouse",
                     "action": "Point",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "97635e20-2dd7-4158-831d-2156c39beb41",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
+                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

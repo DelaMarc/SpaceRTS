@@ -14,6 +14,14 @@ namespace Core.Modules.CameraManagement
         [SerializeField] private float m_camFollowSpeed = 0.2f;
         [SerializeField] private float m_cameraLookSpeed = 2f;
         [SerializeField] private float m_cameraPivotSpeed = 2f;
+        [Header("Zoom")]
+        [SerializeField] private float m_minZoomDist = 3;
+        [SerializeField] private float m_maxZoomDist = 10;
+        [SerializeField] private float m_zoomOutSpeed;
+        [SerializeField] private float m_timeReachMinZoom = 1;
+        [SerializeField] private float m_timeReachMaxZoom = 1;
+        private float m_zoomInTimer = 0;
+        private float m_zoomOutTimer = 0;
         //private CinemachineFreeLook m_camera;
         private CameraManagement Camera;
         private Vector3 m_camFollowVelocity = Vector3.zero;
@@ -33,7 +41,7 @@ namespace Core.Modules.CameraManagement
             Camera = Entity as CameraManagement;
             m_rotating = false;
             Camera.Actions.General.Select.started += OnTrySelect;
-            Camera.Actions.Camera.Zoom.performed += OnZoom;
+            Camera.Actions.Camera.Focus.performed += OnFocus;
             Camera.Actions.Camera.Rotate.performed += OnRotatePressed;
             Camera.Actions.Camera.Rotate.canceled += OnRotatePressed;
             Debug.Log($"<color=green>Camera module started</color>");
@@ -41,11 +49,57 @@ namespace Core.Modules.CameraManagement
             m_rotationY = 0;
         }
 
+        public override void Cleanup()
+        {
+            base.Cleanup();
+            Camera.Actions.General.Select.started -= OnTrySelect;
+            Camera.Actions.Camera.Focus.performed -= OnFocus;
+            Camera.Actions.Camera.Rotate.performed -= OnRotatePressed;
+            Camera.Actions.Camera.Rotate.canceled -= OnRotatePressed;
+        }
+
         public override void LateManage()
         {
             base.Manage();
             FollowTarget();
             ManageRotation();
+            ManageZoom();
+        }
+
+        private void ManageZoom()
+        {
+            if (Camera.Target == null || m_rotating)
+            {
+                m_zoomOutTimer = 0;
+                m_zoomInTimer = 0;
+                return;
+            }
+            float zoomValue = Camera.Actions.Camera.Zoom.ReadValue<float>();
+            if (zoomValue != 0f)
+            {
+                Vector3 currentPos = Camera.Camera.transform.position;
+                Vector3 zoomDest = Camera.Target.position;
+                float currentZoom = (Camera.Camera.transform.position - Camera.Target.position).magnitude;
+                if (zoomValue < 0f)
+                {
+                    m_zoomInTimer = 0;
+                    //currentZoom = Mathf.Min(currentZoom + m_zoomOutSpeed * Time.fixedDeltaTime, m_maxZoomDist);
+                    //zoomDest += dir * m_maxZoomDist;
+                    currentZoom = Mathf.Lerp(currentZoom, m_maxZoomDist, m_zoomOutTimer / m_timeReachMaxZoom);
+                    m_zoomOutTimer = Mathf.Min(m_zoomOutTimer + Time.fixedDeltaTime, m_timeReachMaxZoom);
+                }
+                else
+                {
+                    m_zoomOutTimer = 0;
+                    //currentZoom = Mathf.Max(currentZoom - m_zoomOutSpeed * Time.fixedDeltaTime, m_minZoomDist);
+                    currentZoom = Mathf.Lerp(currentZoom, m_minZoomDist, m_zoomInTimer / m_timeReachMinZoom);
+                    m_zoomInTimer = Mathf.Min(m_zoomInTimer + Time.fixedDeltaTime, m_timeReachMinZoom);
+                }
+                //m_zoomDir = Vector3.Lerp(currentPos, zoomDest, m_zoomLerpFactor * Time.fixedDeltaTime);
+                //Camera.Camera.transform.position = Vector3.Lerp(currentPos, zoomDest, m_zoomLerpFactor * Time.fixedDeltaTime);
+                m_zoomDir = Camera.Camera.transform.forward * currentZoom;
+                Debug.Log($"Zoom Value: {currentZoom}");
+            }
         }
 
         private void ManageRotation()
@@ -112,7 +166,7 @@ namespace Core.Modules.CameraManagement
             {
                 Camera.Camera.transform.position = dest;
             }
-            Debug.Log($"Follow dist from dest point {(Camera.Camera.transform.position - dest).sqrMagnitude} | {m_zoomMax}");
+            //Debug.Log($"Follow dist from dest point {(Camera.Camera.transform.position - dest).sqrMagnitude} | {m_zoomMax}");
             Debug.DrawLine(Camera.Camera.transform.position, dest, Color.black);
         }
 
@@ -141,7 +195,7 @@ namespace Core.Modules.CameraManagement
             }
         }
 
-        private void OnZoom(InputAction.CallbackContext obj)
+        private void OnFocus(InputAction.CallbackContext obj)
         {
             if (m_currentSelected == null)
             {

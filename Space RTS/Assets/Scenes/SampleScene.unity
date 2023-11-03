@@ -446,6 +446,11 @@ MonoBehaviour:
   m_camFollowSpeed: 0.1
   m_cameraLookSpeed: 5
   m_cameraPivotSpeed: 5
+  m_minZoomDist: 3
+  m_maxZoomDist: 1000
+  m_zoomOutSpeed: 200
+  m_timeReachMinZoom: 1
+  m_timeReachMaxZoom: 1
 --- !u!114 &430956581
 MonoBehaviour:
   m_ObjectHideFlags: 0

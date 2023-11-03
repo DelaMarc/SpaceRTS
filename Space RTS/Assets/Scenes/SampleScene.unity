@@ -165,8 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 619fe5586aadf2c48b123186c30699c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_modules:
-  - {fileID: 249058507}
+  m_modules: []
 --- !u!114 &249058507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,7 +178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36279b8cbfebf1242aaae33484e17fe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_camera: {fileID: 592495980}
 --- !u!1 &352623118
 GameObject:
   m_ObjectHideFlags: 0
@@ -287,6 +285,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minZoomValue: 2.5
+  m_renderer: {fileID: 352623121}
 --- !u!1 &376825244
 GameObject:
   m_ObjectHideFlags: 3
@@ -393,6 +392,7 @@ GameObject:
   - component: {fileID: 430956581}
   - component: {fileID: 430956580}
   - component: {fileID: 430956579}
+  - component: {fileID: 430956582}
   m_Layer: 0
   m_Name: Camera Management
   m_TagString: Untagged
@@ -465,7 +465,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_modules:
   - {fileID: 430956580}
+  - {fileID: 430956582}
   m_camera: {fileID: 963194227}
+--- !u!114 &430956582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430956577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36279b8cbfebf1242aaae33484e17fe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &462096812
 GameObject:
   m_ObjectHideFlags: 0
@@ -574,6 +587,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minZoomValue: 2.5
+  m_renderer: {fileID: 462096815}
 --- !u!114 &462096818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1381,6 +1395,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minZoomValue: 2.5
+  m_renderer: {fileID: 1002360533}
 --- !u!1 &1188681968
 GameObject:
   m_ObjectHideFlags: 3
@@ -1683,6 +1698,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minZoomValue: 2.5
+  m_renderer: {fileID: 1428062750}
 --- !u!1 &1571713199
 GameObject:
   m_ObjectHideFlags: 3
@@ -2070,3 +2086,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_minZoomValue: 2.5
+  m_renderer: {fileID: 1988667226}

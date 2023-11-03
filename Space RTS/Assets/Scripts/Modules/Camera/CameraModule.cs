@@ -25,10 +25,10 @@ namespace Core.Modules.CameraManagement
         //private CinemachineFreeLook m_camera;
         private CameraManagement Camera;
         private Vector3 m_camFollowVelocity = Vector3.zero;
-        private SelectableComponent m_currentSelected;
+        //private SelectableComponent m_currentSelected;
         private float m_zoomMax;
         private Vector3 m_zoomDir;
-        private int m_zoomCount = 0;
+        //private int m_zoomCount = 0;
         //rotation
         private bool m_rotating;
         private float m_lookAngle, m_pivotAngle, m_targetDistance;
@@ -40,7 +40,6 @@ namespace Core.Modules.CameraManagement
             base.Init(a_entity);
             Camera = Entity as CameraManagement;
             m_rotating = false;
-            Camera.Actions.General.Select.started += OnTrySelect;
             Camera.Actions.Camera.Focus.performed += OnFocus;
             Camera.Actions.Camera.Rotate.performed += OnRotatePressed;
             Camera.Actions.Camera.Rotate.canceled += OnRotatePressed;
@@ -52,7 +51,6 @@ namespace Core.Modules.CameraManagement
         public override void Cleanup()
         {
             base.Cleanup();
-            Camera.Actions.General.Select.started -= OnTrySelect;
             Camera.Actions.Camera.Focus.performed -= OnFocus;
             Camera.Actions.Camera.Rotate.performed -= OnRotatePressed;
             Camera.Actions.Camera.Rotate.canceled -= OnRotatePressed;
@@ -77,28 +75,23 @@ namespace Core.Modules.CameraManagement
             float zoomValue = Camera.Actions.Camera.Zoom.ReadValue<float>();
             if (zoomValue != 0f)
             {
-                Vector3 currentPos = Camera.Camera.transform.position;
-                Vector3 zoomDest = Camera.Target.position;
+                float minZoom = Camera.CurrentSelected.MinZoomValue;
                 float currentZoom = (Camera.Camera.transform.position - Camera.Target.position).magnitude;
+                // Zoom Out
                 if (zoomValue < 0f)
                 {
                     m_zoomInTimer = 0;
-                    //currentZoom = Mathf.Min(currentZoom + m_zoomOutSpeed * Time.fixedDeltaTime, m_maxZoomDist);
-                    //zoomDest += dir * m_maxZoomDist;
                     currentZoom = Mathf.Lerp(currentZoom, m_maxZoomDist, m_zoomOutTimer / m_timeReachMaxZoom);
                     m_zoomOutTimer = Mathf.Min(m_zoomOutTimer + Time.fixedDeltaTime, m_timeReachMaxZoom);
                 }
+                // Zoom In
                 else
                 {
                     m_zoomOutTimer = 0;
-                    //currentZoom = Mathf.Max(currentZoom - m_zoomOutSpeed * Time.fixedDeltaTime, m_minZoomDist);
-                    currentZoom = Mathf.Lerp(currentZoom, m_minZoomDist, m_zoomInTimer / m_timeReachMinZoom);
+                    currentZoom = Mathf.Lerp(currentZoom, minZoom, m_zoomInTimer / m_timeReachMinZoom);
                     m_zoomInTimer = Mathf.Min(m_zoomInTimer + Time.fixedDeltaTime, m_timeReachMinZoom);
                 }
-                //m_zoomDir = Vector3.Lerp(currentPos, zoomDest, m_zoomLerpFactor * Time.fixedDeltaTime);
-                //Camera.Camera.transform.position = Vector3.Lerp(currentPos, zoomDest, m_zoomLerpFactor * Time.fixedDeltaTime);
                 m_zoomDir = Camera.Camera.transform.forward * currentZoom;
-                Debug.Log($"Zoom Value: {currentZoom}");
             }
         }
 
@@ -144,7 +137,7 @@ namespace Core.Modules.CameraManagement
             }
             Vector3 dest = Camera.Target.transform.position - m_zoomDir;
             float distance = Vector3.Distance(dest, Camera.Camera.transform.position);
-            float refDist = m_zoomCount == 1 ? 0.01f : m_zoomMax;
+            float refDist = Camera.ZoomCount == 1 ? 0.01f : m_zoomMax;
             //smooth follow target
             if (distance > refDist)
             {
@@ -171,45 +164,22 @@ namespace Core.Modules.CameraManagement
         }
 
         #region Events
-        private void OnTrySelect(InputAction.CallbackContext obj)
-        {
-            RaycastHit hit;
-            Vector2 point = Camera.Actions.Camera.Point.ReadValue<Vector2>();
-            Ray ray = Camera.Camera.ScreenPointToRay(point);
-
-            if (Physics.Raycast(ray, out hit, 100f))
-            {
-                SelectableComponent selectable = hit.collider.GetComponent<SelectableComponent>();
-                if (selectable != null)
-                {
-                    m_currentSelected = selectable;
-                    m_zoomCount = 0;
-                }
-            }
-            else
-            {
-                if (Camera.Target != null)
-                {
-                    m_currentSelected = null;
-                }
-            }
-        }
 
         private void OnFocus(InputAction.CallbackContext obj)
         {
-            if (m_currentSelected == null)
+            if (Camera.CurrentSelected == null)
             {
                 return;
             }
-            ++m_zoomCount;
-            Camera.Target = m_currentSelected.transform;
-            if (m_zoomCount == 1)
+            Camera.IncreaseZoomCount();
+            Camera.Target = Camera.CurrentSelected.transform;
+            if (Camera.ZoomCount == 1)
             {
                 m_zoomMax = Vector3.Distance(Camera.Target.position, Camera.Camera.transform.position);
             }
             else
             {
-                m_zoomMax = m_currentSelected.MinZoomValue;
+                m_zoomMax = Camera.CurrentSelected.MinZoomValue;
             }
             m_camFollowVelocity = Vector3.zero;
             m_zoomDir = Camera.Camera.transform.forward * m_zoomMax;
@@ -219,29 +189,20 @@ namespace Core.Modules.CameraManagement
         private void OnRotatePressed(InputAction.CallbackContext obj)
         {
             m_rotating = obj.performed;
-            if (m_rotating && m_currentSelected != null)
+            if (m_rotating && Camera.CurrentSelected != null)
             {
-                m_targetDistance = Vector3.Distance(Camera.Camera.transform.position, m_currentSelected.transform.position);
-                Camera.Target = m_currentSelected?.transform;
+                m_targetDistance = Vector3.Distance(Camera.Camera.transform.position, Camera.CurrentSelected.transform.position);
+                Camera.Target = Camera.CurrentSelected?.transform;
             }
             // Rotation released, set zoom settings to first state
             else
             {
                 m_zoomMax = Vector3.Distance(Camera.Target.position, Camera.Camera.transform.position);
                 m_zoomDir = Camera.Camera.transform.forward * m_zoomMax;
-                m_zoomCount = 1;
+                Camera.SetZoomCount(1);
             }
         }
         #endregion
-
-        private void OnDrawGizmos()
-        {
-            if (m_currentSelected != null)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(Camera.Camera.transform.position, m_currentSelected.transform.position);
-            }
-        }
 
     }
 }
